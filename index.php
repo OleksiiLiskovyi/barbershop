@@ -1,11 +1,16 @@
-<?php include("header.php"); ?>
-<?php include("left_menu.php"); ?>
+<?php
+$action = $_GET['action'] ?? 'main';
 
-<main class="content">
-    <h2>Головна</h2>
-    <p>Ласкаво просимо до нашого барбершопу!</p>
-    <p>Ми пропонуємо професійні чоловічі стрижки, оформлення бороди та укладки.</p>
-    <p>Комфортна атмосфера та досвідчені майстри гарантують якісний результат.</p>
-</main>
+$view_path = "views/{$action}.php";
 
-<?php include("footer.php"); ?>
+if (!file_exists($view_path)) {
+    $view_path = 'views/main.php';
+}
+
+include 'layout/header.php';
+include 'layout/left_menu.php';
+
+include $view_path;
+
+include 'layout/footer.php';
+?>
