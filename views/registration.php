@@ -41,8 +41,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        header('Location: index.php?action=registration_successful');
-        exit;
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+        try {
+            $sql = "INSERT INTO users (login, email, password, country) VALUES (:login, :email, :password, :country)";
+            $stmt = $pdo->prepare($sql);
+            
+            $stmt->execute([
+                ':login' => $login,
+                ':email' => $email,
+                ':password' => $hashed_password,
+                ':country' => $country
+            ]);
+
+            header('Location: index.php?action=registration_successful');
+            exit;
+
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+                $errors['db'] = 'Користувач із таким логіном або email вже існує у системі.';
+            } else {
+                $errors['db'] = 'Помилка бази даних: ' . $e->getMessage();
+            }
+        }
     }
 }
 ?>

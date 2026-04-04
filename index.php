@@ -1,4 +1,6 @@
 <?php
+require_once 'db_connect.php';
+
 $action = $_GET['action'] ?? 'main';
 
 $view_path = "views/{$action}.php";
