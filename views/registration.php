@@ -21,32 +21,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $country = strtoupper(trim($_POST['country'] ?? ''));
 
     if (empty($login) || !preg_match('/^[a-zA-Zа-яА-Я0-9_-]{4,}$/u', $login)) {
-        $errors['login'] = 'Логін має містити не менше 4 символів: тільки латинські або кириличні літери, цифри, _ або -.';
+        $errors['login'] = 'Логін має містити не менше 4 символів (літери, цифри, _ або -)';
     }
 
     if (empty($password) || !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{7,}$/', $password)) {
-        $errors['password'] = 'Пароль має містити не менше 7 символів, великі та малі літери і хоча б одну цифру.';
+        $errors['password'] = 'Пароль має містити не менше 7 символів, велику та малу літеру і цифру';
     }
 
     if ($password !== $repeat_password) {
-        $errors['repeat_password'] = 'Паролі не співпадають.';
+        $errors['repeat_password'] = 'Паролі не співпадають';
     }
 
     if (empty($email) || !preg_match('/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/i', $email)) {
-        $errors['email'] = 'Електронна пошта має бути коректною.';
+        $errors['email'] = 'Введіть коректну електронну пошту';
     }
 
     if (empty($country) || !preg_match('/^[A-Z]{2}$/', $country) || !isset($countries[$country])) {
-        $errors['country'] = 'Оберіть країну зі списку.';
+        $errors['country'] = 'Оберіть країну зі списку';
     }
 
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
         try {
-            $sql = "INSERT INTO users (login, email, password, country) VALUES (:login, :email, :password, :country)";
+            $sql = "INSERT INTO users (login, email, password, country, admin) VALUES (:login, :email, :password, :country, 0)";
             $stmt = $pdo->prepare($sql);
-            
             $stmt->execute([
                 ':login' => $login,
                 ':email' => $email,
@@ -59,49 +58,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
-                $errors['db'] = 'Користувач із таким логіном або email вже існує у системі.';
+                $errors['db'] = 'Користувач з таким логіном або email вже існує';
             } else {
-                $errors['db'] = 'Помилка бази даних: ' . $e->getMessage();
+                $errors['db'] = 'Помилка бази даних';
             }
         }
     }
 }
 ?>
+
 <main class="content">
-    <h2>Реєстрація</h2>
+    <h2>Реєстрація нового клієнта</h2>
 
-    <?php if (!empty($errors)): ?>
-        <div style="background:#3a2a2a; color:#ffaaaa; padding:15px; margin-bottom:20px; border:1px solid #c9a227;">
-            <strong>Помилки заповнення:</strong>
-            <ul>
-                <?php foreach ($errors as $field => $message): ?>
-                    <li><strong><?= ucfirst($field) ?>:</strong> <?= htmlspecialchars($message) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
+    <div class="form-card">
+        <?php if (!empty($errors)): ?>
+            <div class="error-box">
+                <strong>Помилки заповнення форми</strong>
+                <ul>
+                    <?php foreach ($errors as $field => $message): ?>
+                        <li><strong><?= ucfirst(htmlspecialchars($field)) ?>:</strong> <?= htmlspecialchars($message) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
-    <form method="post" action="index.php?action=registration">
-        <p><label for="login">Логін:</label><br>
-        <input type="text" id="login" name="login" value="<?= htmlspecialchars($login) ?>" required style="width:100%;padding:8px;background:#222;color:#eee;border:1px solid #c9a227;"></p>
+        <form method="post" action="index.php?action=registration">
+            <p>
+                <label for="login">Логін</label>
+                <input type="text" id="login" name="login" value="<?= htmlspecialchars($login) ?>" required>
+            </p>
 
-        <p><label for="password">Пароль:</label><br>
-        <input type="password" id="password" name="password" required style="width:100%;padding:8px;background:#222;color:#eee;border:1px solid #c9a227;"></p>
+            <p>
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+            </p>
 
-        <p><label for="repeat_password">Повторіть пароль:</label><br>
-        <input type="password" id="repeat_password" name="repeat_password" required style="width:100%;padding:8px;background:#222;color:#eee;border:1px solid #c9a227;"></p>
+            <p>
+                <label for="repeat_password">Повторіть пароль</label>
+                <input type="password" id="repeat_password" name="repeat_password" required>
+            </p>
 
-        <p><label for="email">Електронна пошта:</label><br>
-        <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required style="width:100%;padding:8px;background:#222;color:#eee;border:1px solid #c9a227;"></p>
+            <p>
+                <label for="email">Електронна пошта</label>
+                <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
+            </p>
 
-        <p><label for="country">Країна:</label><br>
-        <select id="country" name="country" required style="width:100%;padding:8px;background:#222;color:#eee;border:1px solid #c9a227;">
-            <option value="">оберіть країну</option>
-            <?php foreach ($countries as $code => $name): ?>
-                <option value="<?= $code ?>" <?= ($country === $code) ? 'selected' : '' ?>><?= htmlspecialchars($name) ?></option>
-            <?php endforeach; ?>
-        </select></p>
+            <p>
+                <label for="country">Країна</label>
+                <select id="country" name="country" required>
+                    <option value="">— оберіть країну —</option>
+                    <?php foreach ($countries as $code => $name): ?>
+                        <option value="<?= $code ?>" <?= ($country === $code) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
 
-        <p><button type="submit" style="background:#c9a227;color:#000;padding:12px 30px;font-size:16px;border:none;cursor:pointer;">Зареєструватися</button></p>
-    </form>
+            <p>
+                <button type="submit">Зареєструватися</button>
+            </p>
+        </form>
+
+        <p style="text-align: center; margin-top: 25px; color: #ccc;">
+            Вже маєте акаунт? 
+            <a href="index.php?action=login">Увійти</a>
+        </p>
+    </div>
 </main>
