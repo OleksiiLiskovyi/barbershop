@@ -14,53 +14,42 @@ if (file_exists('countries.txt')) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $login = trim($_POST['login'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $login = mysqli_real_escape_string($link, trim($_POST['login'] ?? ''));
+    $email = mysqli_real_escape_string($link, trim($_POST['email'] ?? ''));
+    $country = mysqli_real_escape_string($link, strtoupper(trim($_POST['country'] ?? '')));
+    $password_raw = $_POST['password'] ?? '';
     $repeat_password = $_POST['repeat_password'] ?? '';
-    $email = trim($_POST['email'] ?? '');
-    $country = strtoupper(trim($_POST['country'] ?? ''));
 
     if (empty($login) || !preg_match('/^[a-zA-Zа-яА-Я0-9_-]{4,}$/u', $login)) {
-        $errors['login'] = 'Логін має містити не менше 4 символів (літери, цифри, _ або -)';
+        $errors['login'] = 'Логін має бути від 4 символів';
     }
 
-    if (empty($password) || !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{7,}$/', $password)) {
-        $errors['password'] = 'Пароль має містити не менше 7 символів, велику та малу літеру і цифру';
+    if (empty($password_raw) || !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{7,}$/', $password_raw)) {
+        $errors['password'] = 'Пароль занадто слабкий (потрібна велика літера та цифра)';
     }
 
-    if ($password !== $repeat_password) {
+    if ($password_raw !== $repeat_password) {
         $errors['repeat_password'] = 'Паролі не співпадають';
     }
 
     if (empty($email) || !preg_match('/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/i', $email)) {
-        $errors['email'] = 'Введіть коректну електронну пошту';
-    }
-
-    if (empty($country) || !preg_match('/^[A-Z]{2}$/', $country) || !isset($countries[$country])) {
-        $errors['country'] = 'Оберіть країну зі списку';
+        $errors['email'] = 'Електронна пошта має бути коректною.';
     }
 
     if (empty($errors)) {
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+        $hashed_password = password_hash($password_raw, PASSWORD_BCRYPT);
 
-        try {
-            $sql = "INSERT INTO users (login, email, password, country, admin) VALUES (:login, :email, :password, :country, 0)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                ':login' => $login,
-                ':email' => $email,
-                ':password' => $hashed_password,
-                ':country' => $country
-            ]);
+        $sql = "INSERT INTO users (login, email, password, country, admin) 
+                VALUES ('$login', '$email', '$hashed_password', '$country', 0)";
 
+        if (mysqli_query($link, $sql)) {
             header('Location: index.php?action=registration_successful');
             exit;
-
-        } catch (PDOException $e) {
-            if ($e->getCode() == 23000) {
-                $errors['db'] = 'Користувач з таким логіном або email вже існує';
+        } else {
+            if (mysqli_errno($link) == 1062) {
+                $errors['db'] = 'Цей логін або email вже зайняті';
             } else {
-                $errors['db'] = 'Помилка бази даних';
+                $errors['db'] = 'Помилка збереження: ' . mysqli_error($link);
             }
         }
     }
@@ -68,61 +57,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <main class="content">
-    <h2>Реєстрація нового клієнта</h2>
-
     <div class="form-card">
+        <h2>Створення акаунту</h2>
+
         <?php if (!empty($errors)): ?>
             <div class="error-box">
-                <strong>Помилки заповнення форми</strong>
+                <strong>Виправте наступні помилки:</strong>
                 <ul>
-                    <?php foreach ($errors as $field => $message): ?>
-                        <li><strong><?= ucfirst(htmlspecialchars($field)) ?>:</strong> <?= htmlspecialchars($message) ?></li>
+                    <?php foreach ($errors as $msg): ?>
+                        <li><?= htmlspecialchars($msg) ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
         <?php endif; ?>
 
         <form method="post" action="index.php?action=registration">
-            <p>
-                <label for="login">Логін</label>
-                <input type="text" id="login" name="login" value="<?= htmlspecialchars($login) ?>" required>
-            </p>
+            <label for="login">Ваш логін</label>
+            <input type="text" id="login" name="login" value="<?= htmlspecialchars($login) ?>" required>
 
-            <p>
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
-            </p>
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" required>
 
-            <p>
-                <label for="repeat_password">Повторіть пароль</label>
-                <input type="password" id="repeat_password" name="repeat_password" required>
-            </p>
+            <label for="repeat_password">Підтвердіть пароль</label>
+            <input type="password" id="repeat_password" name="repeat_password" required>
 
-            <p>
-                <label for="email">Електронна пошта</label>
-                <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
-            </p>
+            <label for="email">Електронна пошта</label>
+            <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
 
-            <p>
-                <label for="country">Країна</label>
-                <select id="country" name="country" required>
-                    <option value="">— оберіть країну —</option>
-                    <?php foreach ($countries as $code => $name): ?>
-                        <option value="<?= $code ?>" <?= ($country === $code) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($name) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </p>
+            <label for="country">Країна походження</label>
+            <select id="country" name="country" required>
+                <option value="">— оберіть країну —</option>
+                <?php foreach ($countries as $code => $name): ?>
+                    <option value="<?= $code ?>" <?= ($country === $code) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($name) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-            <p>
-                <button type="submit">Зареєструватися</button>
-            </p>
+            <button type="submit">Зареєструватися</button>
         </form>
 
-        <p style="text-align: center; margin-top: 25px; color: #ccc;">
-            Вже маєте акаунт? 
-            <a href="index.php?action=login">Увійти</a>
+        <p style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
+            Вже є профіль? <a href="index.php?action=login" class="link-edit">Увійти в кабінет</a>
         </p>
     </div>
 </main>

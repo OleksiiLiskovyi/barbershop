@@ -1,7 +1,14 @@
 <?php
+session_start();
 require_once 'db_connect.php';
 
 $action = $_GET['action'] ?? 'main';
+
+if ($action === 'logout') {
+    session_destroy();
+    header('Location: index.php?action=main');
+    exit;
+}
 
 $view_path = "views/{$action}.php";
 if (!file_exists($view_path)) {
