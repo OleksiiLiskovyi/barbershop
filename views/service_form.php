@@ -3,54 +3,68 @@ if (empty($_SESSION)) {
     die("<main class='content'><div class='form-card'><h2>Доступ заборонено!</h2><p>Тільки авторизовані користувачі можуть додавати послуги.</p></div></main>");
 }
 
+$user_id = (int)$_SESSION['user_id'];
 $isAdmin = !empty($_SESSION['admin']);
+$isBarber = false;
+
+$barber_check = mysqli_query($link, "SELECT id FROM barbers WHERE user_id = $user_id");
+if ($barber_check) {
+    $isBarber = mysqli_num_rows($barber_check) > 0;
+}
+
+if (!$isAdmin && !$isBarber) {
+    die("<main class='content'><div class='form-card'><h2>Доступ заборонено!</h2></div></main>");
+}
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$service = ['name' => '', 'description' => '', 'price' => '', 'visible' => 0];
+$service = ['name' => '', 'description' => '', 'price' => '', 'visible' => ($isAdmin ? 1 : 0), 'category_id' => 0];
 
 if ($id > 0) {
     $res = mysqli_query($link, "SELECT * FROM services WHERE id = $id");
-    $service = mysqli_fetch_assoc($res);
+    if ($res) $service = mysqli_fetch_assoc($res);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = mysqli_real_escape_string($link, trim($_POST['name']));
     $desc = mysqli_real_escape_string($link, trim($_POST['description']));
     $price = (float)$_POST['price'];
+    $category_id = (int)$_POST['category_id'];
 
-    if ($isAdmin) {
-        $visible = isset($_POST['visible']) ? 1 : 0;
-    } else {
-        $visible = 0; // не адмін — завжди 0
-    }
+    $visible = $isAdmin ? (isset($_POST['visible']) ? 1 : 0) : 0;
 
     if ($id > 0) {
-        // не дозволяємо не-адміну змінювати visible навіть при редагуванні
         if ($isAdmin) {
-            $sql = "UPDATE services 
-                    SET name='$name', description='$desc', price=$price, visible=$visible 
-                    WHERE id=$id";
+            $sql = "UPDATE services SET name='$name', description='$desc', price=$price, visible=$visible, category_id=$category_id WHERE id=$id";
         } else {
-            $sql = "UPDATE services 
-                    SET name='$name', description='$desc', price=$price 
-                    WHERE id=$id";
+            $sql = "UPDATE services SET name='$name', description='$desc', price=$price, category_id=$category_id WHERE id=$id";
         }
     } else {
-        $author_id = (int)$_SESSION['user_id'];
-        $sql = "INSERT INTO services (name, description, price, visible, author_id) 
-                VALUES ('$name', '$desc', $price, $visible, $author_id)";
+        $sql = "INSERT INTO services (name, description, price, visible, author_id, category_id) VALUES ('$name', '$desc', $price, $visible, $user_id, $category_id)";
     }
 
     mysqli_query($link, $sql);
-    $cat_list = mysqli_query($link, "SELECT * FROM categories");
     header("Location: index.php?action=services");
     exit;
 }
+
+$cat_list = mysqli_query($link, "SELECT * FROM categories");
 ?>
 
 <main class="content">
     <form method="post" class="form-card">
         <h2><?= $id > 0 ? 'Редагування послуги' : 'Нова послуга' ?></h2>
+
+        <label>Категорія послуги</label>
+        <select name="category_id" required>
+            <option value="">— Оберіть категорію —</option>
+            <?php 
+            if ($cat_list) mysqli_data_seek($cat_list, 0);
+            while($c = mysqli_fetch_assoc($cat_list)): ?>
+                <option value="<?= $c['id'] ?>" <?= ($service['category_id'] == $c['id']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($c['name']) ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
 
         <label>Назва послуги</label>
         <input type="text" name="name" value="<?= htmlspecialchars($service['name']) ?>" required>
@@ -69,18 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </label>
                 <span class="switch-label">Опублікувати на сайті</span>
             </div>
+        <?php else: ?>
+            <p class="meta-text">ℹ Послуга буде збережена як чернетка.</p>
         <?php endif; ?>
-<label>Категорія послуги</label>
-<select name="category_id" required>
-    <option value="">— Оберіть категорію —</option>
-    <?php 
-    mysqli_data_seek($cat_list, 0);
-    while($c = mysqli_fetch_assoc($cat_list)): ?>
-        <option value="<?= $c['id'] ?>" <?= ($service['category_id'] == $c['id']) ? 'selected' : '' ?>>
-            <?= htmlspecialchars($c['name']) ?>
-        </option>
-    <?php endwhile; ?>
-</select>
-        <button type="submit">Зберегти</button>
+
+        <button type="submit" class="btn-submit">Зберегти</button>
     </form>
 </main>

@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <main class="content">
     <div class="form-card">
         <h2>Вхід до акаунту</h2>
+        
         <?php if (!empty($errors)): ?>
             <div class="error-box">
                 <strong>Помилка авторизації</strong>
@@ -52,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
 
             <p>
-                <button type="submit">Увійти</button>
+                <button type="submit" class="btn-submit">Увійти</button>
             </p>
         </form>
 
-        <p style="text-align: center; margin-top: 25px; color: #ccc;">
+        <p class="text-center mt-15">
             Ще не маєте акаунту? 
-            <a href="index.php?action=registration">Зареєструватися</a>
+            <a href="index.php?action=registration" class="action-link link-edit">Зареєструватися</a>
         </p>
     </div>
 </main>

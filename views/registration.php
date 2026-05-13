@@ -1,6 +1,6 @@
 <?php
 $errors = [];
-$login = $email = $country = '';
+$login = $email = $country = $first_name = $last_name = $birthdate = '';
 $countries = [];
 
 if (file_exists('countries.txt')) {
@@ -14,10 +14,14 @@ if (file_exists('countries.txt')) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $login = mysqli_real_escape_string($link, trim($_POST['login'] ?? ''));
-    $email = mysqli_real_escape_string($link, trim($_POST['email'] ?? ''));
-    $country = mysqli_real_escape_string($link, strtoupper(trim($_POST['country'] ?? '')));
-    $password_raw = $_POST['password'] ?? '';
+    $login      = mysqli_real_escape_string($link, trim($_POST['login'] ?? ''));
+    $email      = mysqli_real_escape_string($link, trim($_POST['email'] ?? ''));
+    $country    = mysqli_real_escape_string($link, strtoupper(trim($_POST['country'] ?? '')));
+    $first_name = mysqli_real_escape_string($link, trim($_POST['first_name'] ?? ''));
+    $last_name  = mysqli_real_escape_string($link, trim($_POST['last_name'] ?? ''));
+    $birthdate  = mysqli_real_escape_string($link, $_POST['birthdate'] ?? '');
+    
+    $password_raw    = $_POST['password'] ?? '';
     $repeat_password = $_POST['repeat_password'] ?? '';
 
     if (empty($login) || !preg_match('/^[a-zA-Zа-яА-Я0-9_-]{4,}$/u', $login)) {
@@ -36,21 +40,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['email'] = 'Електронна пошта має бути коректною.';
     }
 
+    if (empty($first_name) || !preg_match('/^[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ\s\'-]{2,}$/u', $first_name)) {
+        $errors['first_name'] = 'Введіть коректне ім’я';
+    }
+
+    if (empty($last_name) || !preg_match('/^[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ\s\'-]{2,}$/u', $last_name)) {
+        $errors['last_name'] = 'Введіть коректне прізвище';
+    }
+
+    $date_obj = DateTime::createFromFormat('Y-m-d', $birthdate);
+    if (!$date_obj || $date_obj->format('Y-m-d') !== $birthdate) {
+        $errors['birthdate'] = 'Некоректний формат дати';
+    }
+
     if (empty($errors)) {
         $hashed_password = password_hash($password_raw, PASSWORD_BCRYPT);
-
-        $sql = "INSERT INTO users (login, email, password, country, admin) 
-                VALUES ('$login', '$email', '$hashed_password', '$country', 0)";
+        $sql = "INSERT INTO users (login, email, password, country, first_name, last_name, birthdate, admin) 
+                VALUES ('$login', '$email', '$hashed_password', '$country', '$first_name', '$last_name', '$birthdate', 0)";
 
         if (mysqli_query($link, $sql)) {
             header('Location: index.php?action=registration_successful');
             exit;
         } else {
-            if (mysqli_errno($link) == 1062) {
-                $errors['db'] = 'Цей логін або email вже зайняті';
-            } else {
-                $errors['db'] = 'Помилка збереження: ' . mysqli_error($link);
-            }
+            $errors['db'] = 'Цей логін або email вже зайняті';
         }
     }
 }
@@ -62,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if (!empty($errors)): ?>
             <div class="error-box">
-                <strong>Виправте наступні помилки:</strong>
                 <ul>
                     <?php foreach ($errors as $msg): ?>
                         <li><?= htmlspecialchars($msg) ?></li>
@@ -72,14 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" action="index.php?action=registration">
+            <label for="first_name">Ім’я</label>
+            <input type="text" id="first_name" name="first_name" value="<?= htmlspecialchars($first_name) ?>" required>
+
+            <label for="last_name">Прізвище</label>
+            <input type="text" id="last_name" name="last_name" value="<?= htmlspecialchars($last_name) ?>" required>
+
+            <label for="birthdate">Дата народження</label>
+            <input type="date" id="birthdate" name="birthdate" value="<?= htmlspecialchars($birthdate) ?>" required>
+
             <label for="login">Ваш логін</label>
             <input type="text" id="login" name="login" value="<?= htmlspecialchars($login) ?>" required>
-
-            <label for="password">Пароль</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="repeat_password">Підтвердіть пароль</label>
-            <input type="password" id="repeat_password" name="repeat_password" required>
 
             <label for="email">Електронна пошта</label>
             <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
@@ -94,11 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endforeach; ?>
             </select>
 
-            <button type="submit">Зареєструватися</button>
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="repeat_password">Підтвердіть пароль</label>
+            <input type="password" id="repeat_password" name="repeat_password" required>
+
+            <button type="submit" class="btn-submit">Зареєструватися</button>
         </form>
 
-        <p style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-            Вже є профіль? <a href="index.php?action=login" class="link-edit">Увійти в кабінет</a>
+        <p class="text-center mt-15">
+            Вже є профіль? <a href="index.php?action=login" class="action-link link-edit">Увійти в кабінет</a>
         </p>
     </div>
 </main>
