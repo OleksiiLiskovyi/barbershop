@@ -10,7 +10,6 @@ if (!$s || ($s['visible'] == 0 && empty($_SESSION['admin']))) {
 
 <main class="content">
     <div class="form-card">
-        <span class="status-badge badge-visible static mb-20">Деталі послуги</span>
         <h2><?= htmlspecialchars($s['name']) ?></h2>
         
         <?php if (!empty($s['category_name'])): ?>

@@ -62,6 +62,34 @@ body {
     padding: 0 25px;
 }
 
+.content {
+    flex: 1;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 55px;
+    box-shadow: var(--shadow);
+}
+
+.content h2 {
+    font-size: 34px;
+    margin-bottom: 45px;
+    color: #fff;
+    border-left: 6px solid var(--accent);
+    padding-left: 25px;
+    text-transform: uppercase;
+}
+
+.footer {
+    background-color: var(--bg-panel);
+    padding: 50px;
+    text-align: center;
+    border-top: 4px solid var(--accent);
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: auto;
+}
+
 .menu {
     width: 320px;
     background-color: var(--bg-panel);
@@ -94,6 +122,39 @@ body {
     padding-left: 25px;
 }
 
+.menu-dropdown {
+    position: relative;
+}
+
+.menu-dropdown .submenu {
+    display: none;
+    padding-left: 15px;
+    list-style: none;
+    margin: 5px 0;
+}
+
+.menu-dropdown:hover .submenu {
+    display: block;
+}
+
+.submenu li a {
+    font-size: 0.85em !important;
+    color: var(--text-muted) !important;
+    padding: 8px 15px !important;
+    border-left: none !important;
+}
+
+.submenu li a:hover {
+    color: var(--accent) !important;
+    padding-left: 15px !important;
+}
+
+.toggle-arrow {
+    float: right;
+    font-size: 10px;
+    margin-top: 4px;
+}
+
 .user-section {
     margin-top: 40px;
     padding-top: 35px;
@@ -109,8 +170,8 @@ body {
     margin-bottom: 30px;
 }
 
-.user-name {
-    color: #fbbf24;
+.user-name a {
+    color: #fbbf24 !important;
     font-size: 16px;
     font-weight: 800;
     word-break: break-all;
@@ -118,6 +179,8 @@ body {
     letter-spacing: 1.5px;
     width: 100%;
     text-align: center;
+    border-left: none !important;
+    padding: 0 !important;
 }
 
 .admin-status {
@@ -128,13 +191,14 @@ body {
     border-radius: 4px;
     font-weight: 900;
     text-transform: uppercase;
+    display: inline-block;
 }
 
 .logout-button {
     display: block;
     padding: 12px;
     background-color: rgba(244, 63, 94, 0.1);
-    color: #fb7185;
+    color: #fb7185 !important;
     text-decoration: none;
     border-radius: 10px;
     font-size: 14px;
@@ -142,106 +206,27 @@ body {
     text-align: center;
     border: 1px solid rgba(244, 63, 94, 0.2);
     border-left: none !important; 
-}
-
-.menu .logout-button:hover {
-    background-color: #f43f5e !important;
-    color: white !important;
-    border-left: none !important;      
-    padding-left: 12px !important;
-}
-
-.switch-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin: 25px 0;
-    cursor: pointer;
-}
-
-.switch-label {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--bg-void);
-    border: 1px solid var(--border);
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 4px;
-    bottom: 3px;
-    background-color: #64748b;
-    transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border-radius: 50%;
-    z-index: 2;
-}
-
-input:checked + .slider {
-    background-color: rgba(251, 191, 36, 0.15);
-    border-color: var(--primary);
-}
-
-input:checked + .slider:before {
-    transform: translateX(22px);
-    background-color: #ffffff;
-    box-shadow: 0 0 12px var(--primary);
-}
-
-.switch-label {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-muted);
     transition: 0.3s;
 }
 
-input:checked ~ .switch-label {
-    color: var(--primary);
+.logout-button:hover {
+    background-color: #f43f5e !important;
+    color: white !important;
+    padding-left: 12px !important;
 }
 
-.content {
-    flex: 1;
-    background-color: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 55px;
-    box-shadow: var(--shadow);
+.menu-auth-link {
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--accent) !important;
+    font-weight: bold;
 }
 
-.content h2 {
-    font-size: 34px;
-    margin-bottom: 45px;
-    color: #fff;
-    border-left: 6px solid var(--accent);
-    padding-left: 25px;
-    text-transform: uppercase;
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
 }
 
 .service-card, .form-card {
@@ -252,11 +237,20 @@ input:checked ~ .switch-label {
     margin-bottom: 30px;
     position: relative;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    transition: 0.3s;
 }
 
 .service-card:hover {
     border-color: var(--accent);
     transform: scale(1.01);
+}
+
+.barber-card-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 
 .price-tag {
@@ -265,6 +259,89 @@ input:checked ~ .switch-label {
     color: var(--accent);
     margin: 20px 0;
 }
+
+.accent-text {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.filter-list, .filter-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.filter-item, .filter-btn {
+    padding: 6px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.filter-item:hover, .filter-btn:hover {
+    background: rgba(197, 160, 89, 0.1);
+}
+
+.filter-item.active, .filter-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
+}
+
+.badge-wrapper {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 60%;
+    z-index: 2;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.static {
+    position: static;
+    margin: 0;
+    transform: none;
+}
+
+.badge-visible { 
+    background: rgba(46, 204, 113, 0.1); 
+    color: #2ecc71; 
+    border: 1px solid #2ecc71; 
+}
+
+.badge-hidden { 
+    background: rgba(231, 76, 60, 0.1); 
+    color: #ff4d4d; 
+    border: 1px solid #ff4d4d; 
+}
+
+.badge-category {
+    background: #1a1a1a;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.service-card h3.with-badges {
+    margin-top: 0;
+    padding-right: 160px;
+}
+
 input, select, textarea {
     width: 100%;
     padding: 18px 22px;
@@ -295,44 +372,81 @@ button, .btn-submit {
     cursor: pointer;
     width: 100%;
     box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    transition: 0.3s;
 }
 
-button:hover { 
+button:hover, .btn-submit:hover { 
     transform: translateY(-3px); 
     filter: brightness(1.1); 
 }
 
-.footer {
-    background-color: var(--bg-panel);
-    padding: 50px;
-    text-align: center;
-    border-top: 4px solid var(--accent);
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-top: auto;
+.btn-inline {
+    display: inline-block;
+    width: auto;
+    padding: 10px 20px;
+    text-decoration: none;
 }
 
-.status-badge {
+.switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
     position: absolute;
-    top: 25px;
-    right: 25px;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #0c0c0c;
+    border: 1px solid var(--border);
+    transition: .4s;
+    border-radius: 34px;
 }
 
-.badge-visible { 
-    background: rgba(46, 204, 113, 0.1); 
-    color: #2ecc71; 
-    border: 1px solid #2ecc71; 
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 3px;
+    background-color: #64748b;
+    transition: .4s;
+    border-radius: 50%;
 }
 
-.badge-hidden { 
-    background: rgba(231, 76, 60, 0.1); 
-    color: #ff4d4d; 
-    border: 1px solid #ff4d4d; 
+input:checked + .slider {
+    background-color: rgba(197, 160, 89, 0.2);
+    border-color: var(--accent);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+    background-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.switch-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 .card-actions {
@@ -350,17 +464,222 @@ button:hover {
     transition: 0.3s; 
 }
 
-.link-view { 
+.link-view { color: var(--text-muted); }
+.link-edit { color: var(--accent); }
+.link-delete { color: #ff4d4d; }
+
+.action-link:hover { opacity: 0.8; }
+
+.barber-profile-photo {
+    float: left;
+    width: 250px;
+    margin-right: 30px;
+    margin-bottom: 15px;
+}
+
+.barber-profile-photo img {
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid var(--accent);
+    display: block;
+}
+
+.barber-info-wrap { overflow: hidden; }
+
+.name-accent-line {
+    border-left: 4px solid var(--accent);
+    padding-left: 15px;
+    margin-top: 5px;
+}
+
+.name-accent-line h1 {
+    margin: 0;
+    font-size: 32px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: #fff;
+}
+
+.content:has(h2:contains("Наші професійні майстри")) .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.barber-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.content:has(h2:contains("Наші послуги")) .grid-container {
+    grid-template-columns: 1fr;
+}
+
+.service-list {
+    grid-template-columns: 1fr !important;
+}
+
+.specialization-label {
+    color: var(--accent);
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.horizontal-divider {
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 15px;
+}
+
+.bio-content {
+    line-height: 1.7;
+    color: var(--text-main);
+    font-size: 16px;
+}
+
+.hr-custom {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 30px 0;
+}
+
+.meta-text {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.reviews-section {
+    margin-top: 20px;
+}
+
+.comment-box {
+    background: var(--bg-inner);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 2px solid var(--border);
+}
+
+.comment-top { 
+    display: flex; 
+    justify-content: space-between; 
+}
+
+.comment-user { 
+    font-weight: bold; 
+}
+
+.comment-date { 
+    font-size: 12px; 
     color: var(--text-muted); 
 }
 
-.link-edit { 
-    color: var(--accent); 
+.comment-text { 
+    margin: 10px 0; 
+    color: #bbb; 
+    white-space: pre-line;
 }
 
-.link-delete { 
-    color: #ff4d4d; 
+.comment-footer { 
+    display: flex; 
+    gap: 15px; 
 }
+
+.admin-panel-accent {
+    margin-top: 30px;
+    border: 1px solid var(--accent) !important;
+}
+
+.accent-title {
+    color: var(--accent) !important;
+}
+
+.panel-desc {
+    margin-bottom: 20px;
+}
+
+.admin-btn {
+    display: block;
+    text-align: center;
+    margin-bottom: 15px;
+    text-decoration: none;
+}
+
+.admin-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.admin-table tr { 
+    border-bottom: 1px solid var(--border); 
+}
+
+.admin-table td, .admin-table th { 
+    padding: 12px; 
+}
+
+.admin-table th { 
+    text-align: left; 
+    color: var(--accent); 
+    border-bottom: 2px solid var(--accent);
+}
+
+.thumb-mini { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+}
+
+.clearfix::after { 
+    content: ""; 
+    clear: both; 
+    display: table; 
+}
+
+/* Стилізація блоку з помилками */
+.error-box {
+    background: rgba(231, 76, 60, 0.1); 
+    border: 1px solid #ff4d4d;          
+    border-left: 5px solid #ff4d4d;  
+    color: #ff4d4d; 
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(255, 77, 77, 0.1);
+}
+
+.error-box ul {
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+}
+
+.error-box li {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.error-box li::before {
+    content: "✕";
+    margin-right: 10px;
+    font-weight: 900;
+}
+
+form label {
+    display: block;
+    color: var(--accent);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.text-justify { text-align: justify; }
+.mb-20 { margin-bottom: 20px; }
+.mb-30 { margin-bottom: 30px; }
+.mt-15 { margin-top: 15px; }
 
 @media (max-width: 1100px) {
     .container { 
@@ -371,4 +690,27 @@ button:hover {
     .menu { 
         width: 100%; 
     }
+
+    .content {
+        padding: 30px;
+    }
 }
+
+@media (max-width: 600px) {
+    .barber-profile-photo {
+        float: none;
+        width: 100%;
+        margin-right: 0;
+    }
+    
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+.grid-container {
+        grid-template-columns: 1fr !important;
+    }
+}
+
