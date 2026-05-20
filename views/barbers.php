@@ -1,5 +1,5 @@
 <?php
-$active_cat = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+$active_cat = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 
 $sql = "SELECT b.id, u.first_name, u.last_name, b.image, b.bio, c.name as cat_name 
         FROM barbers b
@@ -12,12 +12,15 @@ if ($active_cat > 0) {
 }
 
 $res = mysqli_query($link, $sql);
+if (!$res) {
+    die("Помилка виконання запиту: " . mysqli_error($link));
+}
 
 $categories = mysqli_query($link, "SELECT * FROM categories");
 ?>
 
 <main class="content">
-    <h2>Наші професійні майстри</h2>
+    <h2>Наші майстри</h2>
     
     <div class="filter-wrapper">
         <?php while ($c = mysqli_fetch_assoc($categories)): 

@@ -3,12 +3,16 @@ if (empty($_SESSION['admin'])) {
     die("Доступ лише для адміністратора!");
 }
 
-$id = (int)($_GET['id'] ?? 0);
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($id <= 0) {
+    die("<main class='content'><div class='form-card'><h2>Помилка: Некоректний ID</h2></div></main>");
+}
 
 $check_sql = "SELECT id FROM services WHERE id = $id";
 $check_res = mysqli_query($link, $check_sql);
 
-if (mysqli_num_rows($check_res) > 0) {
+if ($check_res && mysqli_num_rows($check_res) > 0) {
     mysqli_query($link, "DELETE FROM services WHERE id = $id");
     echo "<main class='content'>
             <div class='form-card'>

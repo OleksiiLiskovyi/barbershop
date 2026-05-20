@@ -1,22 +1,10 @@
 <?php
 $errors = [];
-$login = $email = $country = $first_name = $last_name = $birthdate = '';
-$countries = [];
-
-if (file_exists('countries.txt')) {
-    $lines = file('countries.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos($line, '|') !== false) {
-            list($code, $name) = explode('|', $line, 2);
-            $countries[trim($code)] = trim($name);
-        }
-    }
-}
+$login = $email = $first_name = $last_name = $birthdate = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $login      = mysqli_real_escape_string($link, trim($_POST['login'] ?? ''));
     $email      = mysqli_real_escape_string($link, trim($_POST['email'] ?? ''));
-    $country    = mysqli_real_escape_string($link, strtoupper(trim($_POST['country'] ?? '')));
     $first_name = mysqli_real_escape_string($link, trim($_POST['first_name'] ?? ''));
     $last_name  = mysqli_real_escape_string($link, trim($_POST['last_name'] ?? ''));
     $birthdate  = mysqli_real_escape_string($link, $_POST['birthdate'] ?? '');
@@ -55,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $hashed_password = password_hash($password_raw, PASSWORD_BCRYPT);
-        $sql = "INSERT INTO users (login, email, password, country, first_name, last_name, birthdate, admin) 
-                VALUES ('$login', '$email', '$hashed_password', '$country', '$first_name', '$last_name', '$birthdate', 0)";
+        $sql = "INSERT INTO users (login, email, password, first_name, last_name, birthdate, admin) 
+                VALUES ('$login', '$email', '$hashed_password', '$first_name', '$last_name', '$birthdate', 0)";
 
         if (mysqli_query($link, $sql)) {
             header('Location: index.php?action=registration_successful');
@@ -97,16 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <label for="email">Електронна пошта</label>
             <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
-
-            <label for="country">Країна походження</label>
-            <select id="country" name="country" required>
-                <option value="">— оберіть країну —</option>
-                <?php foreach ($countries as $code => $name): ?>
-                    <option value="<?= $code ?>" <?= ($country === $code) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($name) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
 
             <label for="password">Пароль</label>
             <input type="password" id="password" name="password" required>

@@ -7,16 +7,16 @@ $edit_barber = null;
 $error_msg = '';
 
 if (isset($_GET['edit_id'])) {
-    $edit_id = (int)$_GET['edit_id'];
+    $edit_id = intval($_GET['edit_id']);
     $res = mysqli_query($link, "SELECT * FROM barbers WHERE id = $edit_id");
     $edit_barber = mysqli_fetch_assoc($res);
 }
 
 if (isset($_GET['delete_id'])) {
-    $id = (int)$_GET['delete_id'];
+    $id = intval($_GET['delete_id']);
     $img_res = mysqli_query($link, "SELECT image FROM barbers WHERE id = $id");
     if ($img_res && $img_data = mysqli_fetch_assoc($img_res)) {
-        if (!empty($img_data['image']) && !in_array($img_data['image'], ['default.png'])) {
+        if (!empty($img_data['image']) && !in_array($img_data['image'], ['default.png', 'default_barber.png'])) {
             @unlink("uploads/" . $img_data['image']);
         }
     }
@@ -27,12 +27,12 @@ if (isset($_GET['delete_id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_barber'])) {
-    $cat_id = (int)$_POST['category_id'];
+    $cat_id = intval($_POST['category_id']);
     $bio = mysqli_real_escape_string($link, trim($_POST['bio'] ?? ''));
     $image_update_sql = "";
     
     $image_insert_col = ", image";
-    $image_insert_val = ", 'default.png'";
+    $image_insert_val = ", 'default_barber.png'"; 
 
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
         $file_tmp = $_FILES['photo']['tmp_name'];
@@ -55,10 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_barber'])) {
 
     if (empty($error_msg)) {
         if (isset($_POST['barber_id'])) {
-            $b_id = (int)$_POST['barber_id'];
+            $b_id = intval($_POST['barber_id']);
             mysqli_query($link, "UPDATE barbers SET category_id = $cat_id, bio = '$bio' $image_update_sql WHERE id = $b_id");
         } else {
-            $u_id = (int)$_POST['user_id'];
+            $u_id = intval($_POST['user_id']);
             if ($u_id > 0) {
                 mysqli_query($link, "INSERT INTO barbers (user_id, category_id, bio $image_insert_col) VALUES ($u_id, $cat_id, '$bio' $image_insert_val)");
             }
@@ -71,6 +71,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_barber'])) {
 $available_users = mysqli_query($link, "SELECT id, login FROM users WHERE id NOT IN (SELECT user_id FROM barbers) AND admin = 0");
 $categories_list = mysqli_query($link, "SELECT * FROM categories");
 $all_barbers = mysqli_query($link, "SELECT b.id, b.image, b.bio, u.login, c.name as cat_name FROM barbers b JOIN users u ON b.user_id = u.id JOIN categories c ON b.category_id = c.id");
+
+$edit_barber_login = '';
+if ($edit_barber) {
+    $barber_user_id = intval($edit_barber['user_id']);
+    $u_res = mysqli_query($link, "SELECT login FROM users WHERE id = $barber_user_id");
+    if ($u_res && $u_row = mysqli_fetch_assoc($u_res)) {
+        $edit_barber_login = $u_row['login'];
+    }
+}
 ?>
 
 <main class="content">
@@ -87,11 +96,11 @@ $all_barbers = mysqli_query($link, "SELECT b.id, b.image, b.bio, u.login, c.name
         <form method="post" enctype="multipart/form-data" onsubmit="return confirm('Підтвердити дію?')">
             <?php if ($edit_barber): ?>
                 <input type="hidden" name="barber_id" value="<?= $edit_barber['id'] ?>">
-                <p class="mb-20">Майстер: <strong><?= htmlspecialchars(mysqli_fetch_assoc(mysqli_query($link, "SELECT login FROM users WHERE id = {$edit_barber['user_id']}"))['login']) ?></strong></p>
+                <p class="mb-20">Майстер: <strong><?= htmlspecialchars($edit_barber_login) ?></strong></p>
             <?php else: ?>
                 <label>Оберіть користувача:</label>
                 <select name="user_id" required>
-                    <option value="">— Оберіть —</option>
+                    <option value="">Обрати</option>
                     <?php while ($u = mysqli_fetch_assoc($available_users)): ?>
                         <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['login']) ?></option>
                     <?php endwhile; ?>
@@ -111,7 +120,7 @@ $all_barbers = mysqli_query($link, "SELECT b.id, b.image, b.bio, u.login, c.name
             <label>Фото майстра:</label>
             <input type="file" name="photo" accept="image/*">
 
-            <button type="submit" name="save_barber" class="btn-submit"><?= $edit_barber ? 'Зберегти зміни' : 'Додати до штату' ?></button>
+            <button type="submit" name="save_barber" class="btn-submit"><?= $edit_barber ? 'Зберегти зміни' : 'Додати майстра' ?></button>
         </form>
 
         <h3 class="mt-20 mb-20">Список майстрів</h3>

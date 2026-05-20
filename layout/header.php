@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbershop - Класичний стиль для чоловіків</title>
+    <title>Barbershop Lama</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>BARBERSHOP</h1>
-        <p>Класичний стиль для справжніх чоловіків</p>
+<div class="header">
+    <div class="header-top">
+        <img src="img/logo.png" alt="Logo" class="header-logo">
     </div>
+    <h1>барбершоп для справжніх чоловіків</h1>
     
+    <button class="burger-menu" id="burgerButton">☰</button>
+</div>   
     <div class="container">

@@ -3,7 +3,7 @@ if (empty($_SESSION)) {
     die("<main class='content'><div class='form-card'><h2>Доступ заборонено!</h2><p>Тільки авторизовані користувачі можуть додавати послуги.</p></div></main>");
 }
 
-$user_id = (int)$_SESSION['user_id'];
+$user_id = intval($_SESSION['user_id']);
 $isAdmin = !empty($_SESSION['admin']);
 $isBarber = false;
 
@@ -16,19 +16,23 @@ if (!$isAdmin && !$isBarber) {
     die("<main class='content'><div class='form-card'><h2>Доступ заборонено!</h2></div></main>");
 }
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $service = ['name' => '', 'description' => '', 'price' => '', 'visible' => ($isAdmin ? 1 : 0), 'category_id' => 0];
 
 if ($id > 0) {
     $res = mysqli_query($link, "SELECT * FROM services WHERE id = $id");
-    if ($res) $service = mysqli_fetch_assoc($res);
+    if ($res && mysqli_num_rows($res) > 0) {
+        $service = mysqli_fetch_assoc($res);
+    } else {
+        $id = 0;
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = mysqli_real_escape_string($link, trim($_POST['name']));
-    $desc = mysqli_real_escape_string($link, trim($_POST['description']));
-    $price = (float)$_POST['price'];
-    $category_id = (int)$_POST['category_id'];
+    $name = mysqli_real_escape_string($link, trim($_POST['name'] ?? ''));
+    $desc = mysqli_real_escape_string($link, trim($_POST['description'] ?? ''));
+    $price = floatval($_POST['price'] ?? 0);
+    $category_id = intval($_POST['category_id'] ?? 0);
 
     $visible = $isAdmin ? (isset($_POST['visible']) ? 1 : 0) : 0;
 
@@ -36,15 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($isAdmin) {
             $sql = "UPDATE services SET name='$name', description='$desc', price=$price, visible=$visible, category_id=$category_id WHERE id=$id";
         } else {
-            $sql = "UPDATE services SET name='$name', description='$desc', price=$price, category_id=$category_id WHERE id=$id";
+            $author_check = mysqli_query($link, "SELECT author_id FROM services WHERE id=$id");
+            $service_data = mysqli_fetch_assoc($author_check);
+            
+            if ($service_data && $service_data['author_id'] == $user_id) {
+                $sql = "UPDATE services SET name='$name', description='$desc', price=$price, category_id=$category_id WHERE id=$id";
+            } else {
+                die("<main class='content'><div class='form-card'><h2>Помилка: Ви не можете редагувати чужу послугу!</h2></div></main>");
+            }
         }
     } else {
         $sql = "INSERT INTO services (name, description, price, visible, author_id, category_id) VALUES ('$name', '$desc', $price, $visible, $user_id, $category_id)";
     }
 
-    mysqli_query($link, $sql);
-    header("Location: index.php?action=services");
-    exit;
+    if (mysqli_query($link, $sql)) {
+        header("Location: index.php?action=services");
+        exit;
+    } else {
+        die("Помилка бази даних при збереженні: " . mysqli_error($link));
+    }
 }
 
 $cat_list = mysqli_query($link, "SELECT * FROM categories");
