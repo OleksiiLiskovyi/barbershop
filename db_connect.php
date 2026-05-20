@@ -1,8 +1,8 @@
 <?php
-$host     = 'localhost';
-$dbname   = 'barbershop_db';
-$username = 'root';
-$password = '';
+$host     = 'sql106.infinityfree.com';
+$dbname   = 'if0_41973675_barbershop';
+$username = 'if0_41973675';
+$password = 'Lamaphp2026';
 
 $link = mysqli_connect($host, $username, $password, $dbname);
 
